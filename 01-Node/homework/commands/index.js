@@ -45,6 +45,38 @@ module.exports = {
         request(url[0], function(err, response, body){
             if(err) throw err;
             done(body);
+        });
+    },
+    sort: function(file, done){
+        fs.readFile(file[0], 'utf8', function(err, data){
+            if (err) throw err;
+            const lines = data.split("\n");
+            const sortedLines = lines.sort((a, b) => a.localeCompare(b)).join("\n");
+            done(sortedLines);
+        });
+    },
+    wc: function(file, done){
+        fs.readFile(file[0], 'utf8', function(err, data){
+            if(err) throw err;
+            const lines = data.split("\n");
+            var count = lines.length.toString();
+            done(count);
+        });
+    },
+    uniq: function(file, done){
+        fs.readFile(file[0], 'utf8', function(err, data){
+            if (err) throw err;
+            // divido el archivo en lineas
+            const lines = data.split("\n");
+            // ordeno las lineas por la primera letra / caracter y los uno en un string con salto de linea
+            const sortedLines = lines.sort((a, b) => a.localeCompare(b)).join("\n");
+            // lo vuelvo a juntar y convierto el string en un array
+            const joinedLines = sortedLines.split("\n");
+            // sobre el array aplico el metodo Set que elimina elementos repetidos en un array y devuelve un objeto
+            // convierto mi objeto set en un string con el spread operator para traerme todas las propiedades y lo convierto en array con los corchetes
+            const [...setLines] = new Set(joinedLines);
+            const uniqLines = setLines.join("\n");
+            done(uniqLines);
         })
     }
 }

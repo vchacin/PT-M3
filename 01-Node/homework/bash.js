@@ -1,4 +1,6 @@
 //   console.log(process)
+//   console.log(process)
+//   console.log(process)
 //   console.log(Object.keys(process))
   
   /*
@@ -33,9 +35,18 @@ process.stdin.on('data', function (data) {
   var cmd = args.shift();
 
   if(commands.hasOwnProperty(cmd)) {
-    commands[cmd](args)
+    commands[cmd](args, done)
   } else {
     process.stdout.write('Command not found');
   }
-  process.stdout.write('\nprompt > ');
+  // process.stdout.write('\nprompt > ');
 });
+
+
+
+
+// afdjuanjo
+
+// afdjuanjo
+
+
