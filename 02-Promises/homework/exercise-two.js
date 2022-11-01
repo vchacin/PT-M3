@@ -36,22 +36,27 @@ function problemA () {
    */
 
   // callback version
-  async.each(['poem-two/stanza-01.txt', 'poem-two/stanza-02.txt'],
-    function (filename, eachDone) {
-      readFile(filename, function (err, stanza) {
-        console.log('-- A. callback version --');
-        blue(stanza);
-        eachDone();
-      });
-    },
-    function (err) {
-      console.log('-- A. callback version done --');
-    }
-  );
+  // async.each(['poem-two/stanza-01.txt', 'poem-two/stanza-02.txt'],
+  //   function (filename, eachDone) {
+  //     readFile(filename, function (err, stanza) {
+  //       console.log('-- A. callback version --');
+  //       blue(stanza);
+  //       eachDone();
+  //     });
+  //   },
+  //   function (err) {
+  //     console.log('-- A. callback version done --');
+  //   }
+  // );
 
   // promise version
-  // ???
 
+  const one = promisifiedReadFile('poem-two/stanza-01.txt');
+  const two = promisifiedReadFile('poem-two/stanza-02.txt');
+
+  Promise.all([one, two])
+  .then((args) => {args.forEach(poem => blue(poem))})
+  .finally(() => {console.log('done')})
 }
 
 function problemB () {
@@ -69,22 +74,29 @@ function problemB () {
   });
 
   // callback version
-  async.each(filenames,
-    function (filename, eachDone) {
-      readFile(filename, function (err, stanza) {
-        console.log('-- B. callback version --');
-        blue(stanza);
-        eachDone();
-      });
-    },
-    function (err) {
-      console.log('-- B. callback version done --');
-    }
-  );
+  // async.each(filenames,
+  //   function (filename, eachDone) {
+  //     readFile(filename, function (err, stanza) {
+  //       console.log('-- B. callback version --');
+  //       blue(stanza);
+  //       eachDone();
+  //     });
+  //   },
+  //   function (err) {
+  //     console.log('-- B. callback version done --');
+  //   }
+  // );
 
   // promise version
-  // ???
+  // let promisesList = [];
+  // const promises = filenames.forEach(file => promisesList.push(promisifiedReadFile(file)))
+  // Promise.all(promisesList)
 
+  const promisesList = filenames.map(file => promisifiedReadFile(file))
+
+  Promise.all(promisesList)
+    .then((args) => {args.forEach(poem => blue(poem))})
+    .finally(() => {console.log('done')})
 }
 
 function problemC () {
@@ -102,23 +114,43 @@ function problemC () {
     return 'poem-two/' + 'stanza-0' + n + '.txt';
   });
 
+  // const promisesList = filenames.map(file => promisifiedReadFile(file))
+
+  // Promise.all(promisesList)
+  //   .then((args) => {args.forEach(poem => blue(poem))})
+  //   .finally(() => {console.log('done')})
+
   // callback version
-  async.eachSeries(filenames,
-    function (filename, eachDone) {
-      readFile(filename, function (err, stanza) {
-        console.log('-- C. callback version --');
-        blue(stanza);
-        eachDone();
-      });
-    },
-    function (err) {
-      console.log('-- C. callback version done --');
-    }
-  );
+  // async.eachSeries(filenames,
+  //   function (filename, eachDone) {
+  //     readFile(filename, function (err, stanza) {
+  //       console.log('-- C. callback version --');
+  //       blue(stanza);
+  //       eachDone();
+  //     });
+  //   },
+  //   function (err) {
+  //     console.log('-- C. callback version done --');
+  //   }
+  // );
 
   // promise version
-  // ???
+  // Me genera un array con las promesas
+  filenames.reduce((p, file) => {
+    // La primera vez no entra al if, despues si
+    // Por cada elemento disparo un .then
+    // Para la ultima iteracion devuelvo el promisified
+    return p.then((stanza) => {
+      if (stanza) blue(stanza);
+      return promisifiedReadFile(file);
+    })
 
+  }, Promise.resolve(false))
+  // Manejo la respuesta de la ultima iteracion
+  .then((stanza) => {
+    blue(stanza)
+    console.log('done')
+  })
 }
 
 function problemD () {
@@ -139,23 +171,45 @@ function problemD () {
   filenames[randIdx] = 'wrong-file-name-' + (randIdx + 1) + '.txt';
 
   // callback version
-  async.eachSeries(filenames,
-    function (filename, eachDone) {
-      readFile(filename, function (err, stanza) {
-        console.log('-- D. callback version --');
-        if (err) return eachDone(err);
-        blue(stanza);
-        eachDone();
-      });
-    },
-    function (err) {
-      if (err) magenta(new Error(err));
-      console.log('-- D. callback version done --');
-    }
-  );
+  // async.eachSeries(filenames,
+  //   function (filename, eachDone) {
+  //     readFile(filename, function (err, stanza) {
+  //       console.log('-- D. callback version --');
+  //       if (err) return eachDone(err);
+  //       blue(stanza);
+  //       eachDone();
+  //     });
+  //   },
+  //   function (err) {
+  //     if (err) magenta(new Error(err));
+  //     console.log('-- D. callback version done --');
+  //   }
+  // );
 
   // promise version
-  // ???
+  filenames.reduce((p, file) => {
+    // La primera vez no entra al if, despues si
+    // Por cada elemento disparo un .then
+    // Para la ultima iteracion devuelvo el promisified
+    return p.then((stanza) => {
+      if (stanza){
+        blue(stanza);
+      } else if (err) {
+
+      }
+      return promisifiedReadFile(file);
+    })
+
+  }, Promise.resolve(false))
+  // Manejo la respuesta de la ultima iteracion
+  .then((stanza) => {
+    blue(stanza)
+    console.log('done')
+  })
+  .catch((err) => {
+    magenta(new Error(err))
+    console.log('done')
+  })
 
 }
 
@@ -168,6 +222,11 @@ function problemE () {
 
   var fs = require('fs');
   function promisifiedWriteFile (filename, str) {
-    // tu código aquí
+    return new Promise(function (resolve, reject){
+      fs.writeFile(filename, str, err => {
+        if (err) return reject(err)
+        resolve ('Ta todo bien')
+      })
+    })
   }
 }
