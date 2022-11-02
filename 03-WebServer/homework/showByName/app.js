@@ -7,6 +7,18 @@ var http  = require("http")
 http.createServer( function(req, res){ // Creamos una serie de events listener, que van a escuchar por requests que ocurren en este socket
     //Para crear un response empezamos escribiendo el header
    //Le ponemos el status code y algunos pair-values en el header
+
+    fs.readFile(`/images${req}_doge.jpg`, function(err, data){
+        if ( err ){
+            res.writeHead(400, { 'Content-Type':'text/text' }) 
+            res.end('Not found');
+        } else {
+            res.writeHead(200, { 'Content-Type':'image/jpeg' }) 
+            res.end(data);
+        }
+    })
+
+   /*
     var baseUrl = req.url;
 
     console.log('request----', req.url)
@@ -33,6 +45,7 @@ http.createServer( function(req, res){ // Creamos una serie de events listener, 
         res.writeHead(400, { 'Content-Type':'text/text' }) 
         res.end('Not found'); 
     }
+    */
    
 }).listen(1330, '127.0.0.1'); //Por último tenemos que especificar en que puerto y en qué dirección va a estar escuchando nuestro servidor
    
