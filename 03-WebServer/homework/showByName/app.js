@@ -33,15 +33,6 @@ http.createServer( function(req, res){ // Creamos una serie de events listener, 
         res.writeHead(400, { 'Content-Type':'text/text' }) 
         res.end('Not found'); 
     }
-
-
-
-    if ( baseUrl === 'retrato' ) checkPath('retrato')
-    if ( baseUrl === 'sexy' ) checkPath('sexy')
-
-    
-
-    
    
 }).listen(1330, '127.0.0.1'); //Por último tenemos que especificar en que puerto y en qué dirección va a estar escuchando nuestro servidor
    
