@@ -6,9 +6,43 @@ var http = require('http'); // importamos el módulo http para poder trabajar co
 http.createServer( function(req, res){ // Creamos una serie de events listener, que van a escuchar por requests que ocurren en este socket
  //Para crear un response empezamos escribiendo el header
 //  res.writeHead(200, { 'Content-Type':'text/plain' }) //Le ponemos el status code y algunos pair-values en el header
- res.writeHead(200, { 'Content-Type':'text/html' }) 
- var html = fs.readFileSync(__dirname +'/index.html');
- res.end(html);
+
+    var baseUrl = req.url;
+
+
+    function checkPath (path) {
+
+      res.writeHead(200, { 'Content-Type':'text/html' }) 
+      var html = fs.readFileSync(__dirname +'/beatle.html', 'utf8'); //Codificamos el buffer para que sea una String
+      
+      var nombre = path; //Esta es la variable con la que vamos a reemplazar el template
+      var birthdate = beatles[0].birthdate;
+      var image = beatles[0].profilePic;
+
+      html = html.replaceAll('{beatle_name}', nombre); // Usamos el método replace es del objeto String
+      html = html.replace('{birthday}', birthdate); // Usamos el método replace es del objeto String
+      html = html.replace('{source}', image); // Usamos el método replace es del objeto String
+
+      res.end(html);
+    }
+
+    if ( baseUrl === '/api'){
+      res.writeHead(200, { 'Content-Type':'application/json' }) 
+      res.end(JSON.stringify(beatles));
+    } else if ( baseUrl === '/api/john%20lennon'){
+      checkPath('John Lennon')
+    } else if ( baseUrl === '/api/paul%20mccartney'){
+      checkPath('Paul McCartney')
+    } else if ( baseUrl === '/api/george%20harrison'){
+      checkPath('George Harrison')
+    } else if ( baseUrl === '/api/richard%20starkey'){
+      checkPath('Richard Starkey')
+    } else {
+      res.writeHead(404, { 'Content-Type':'text/text' }) 
+      res.end('Not found');
+    }
+
+
 
 
 }).listen(1337, '127.0.0.1'); //Por último tenemos que especificar en que puerto y en qué dirección va a estar escuchando nuestro servidor
