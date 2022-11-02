@@ -9,7 +9,7 @@ http.createServer( function(req, res){ // Creamos una serie de events listener, 
 
     var baseUrl = req.url;
 
-
+    /* 
     function checkPath (path) {
 
       res.writeHead(200, { 'Content-Type':'text/html' }) 
@@ -25,11 +25,61 @@ http.createServer( function(req, res){ // Creamos una serie de events listener, 
 
       res.end(html);
     }
+    */
 
     if ( baseUrl === '/api'){
       res.writeHead(200, { 'Content-Type':'application/json' }) 
-      res.end(JSON.stringify(beatles));
-    } else if ( baseUrl === '/api/john%20lennon'){
+      // para cortar la ejecucion
+      return res.end(JSON.stringify(beatles));
+    } 
+
+    if (baseUrl === '/'){
+      fs.readFile('./index.html', function(err, data){
+        if (err){
+          res.writeHead(404, { 'Content-Type':'text/plain' }) 
+          return res.end('Not found');
+        }
+        res.writeHead(200, { 'Content-Type':'text/html' }) 
+        return res.end(data);
+      })
+    }
+
+    if (baseUrl.substring(0, 5) === '/api/'){
+      const beatle = baseUrl.split('/').pop();
+      const found = beatles.find(b => encodeURI(b.name) === beatle)
+      if ( found ){
+        res.writeHead(200, { 'Content-Type':'application/json' }) 
+        return res.end(JSON.stringify(found));
+      }
+      res.writeHead(404, { 'Content-Type':'text/plain' }) 
+      return res.end( decodeURI(beatle) + ' no es un beatle' );
+    }
+
+    if (baseUrl.length > 1){
+      const beatle = baseUrl.split('/').pop();
+      const found = beatles.find(b => encodeURI(b.name) === beatle)
+      if ( found ){
+        console.log('url', baseUrl)
+        console.log('found', found.name)
+        fs.readFile('./beatle.html', 'utf8', function(err, data){
+          if (err){
+            res.writeHead(404, { 'Content-Type':'text/plain' });
+            return res.end('Pague not found');
+          }
+          res.writeHead(200, { 'Content-Type':'text/html' });
+          data = data.replaceAll('{beatle_name}', found.name); // Usamos el método replace es del objeto String
+          data = data.replace('{birthday}', found.birthdate); // Usamos el método replace es del objeto String
+          data = data.replace('{source}', found.profilePic); // Usamos el método replace es del objeto String
+          return res.end(data);
+        })
+      } else {
+        res.writeHead(404, { 'Content-Type':'text/plain' });
+        return res.end('Beatle not found');
+      }
+    }
+    
+    /*
+    else if ( baseUrl === '/api/john%20lennon'){
       checkPath('John Lennon')
     } else if ( baseUrl === '/api/paul%20mccartney'){
       checkPath('Paul McCartney')
@@ -41,9 +91,7 @@ http.createServer( function(req, res){ // Creamos una serie de events listener, 
       res.writeHead(404, { 'Content-Type':'text/text' }) 
       res.end('Not found');
     }
-
-
-
+    */
 
 }).listen(1337, '127.0.0.1'); //Por último tenemos que especificar en que puerto y en qué dirección va a estar escuchando nuestro servidor
 
